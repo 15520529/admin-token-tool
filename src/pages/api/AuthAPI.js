@@ -1,7 +1,7 @@
 import axios from 'axios';
 import ls from 'localstorage-slim';
-// const be_url = "http://194.233.77.91:8089/v1"
-const be_url = "http://localhost:8089/v1"
+const be_url = "http://194.233.77.91:8089/v1"
+// const be_url = "http://localhost:8089/v1"
 const keyAuth = "auth-1";
 
 export function getAuthentication() {
