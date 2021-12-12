@@ -48,8 +48,26 @@ export const getUsers = (username, token) => {
     return axios.get(be_url + `/get-users/${username}/${token}`);
 }
 
+export const getPass = (username, token) => {
+    return axios.get(be_url + `/get-pass/${username}/${token}`);
+}
+
 export const updateUser = (token, username, status, expireDate ) => {
     return axios.put(be_url + "/update-user", {
+        token,
+        username,
+        status,
+        expireDate
+    }, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
+export const createUser = (token, username, status, expireDate ) => {
+    return axios.post(be_url + "/create-user", {
         token,
         username,
         status,
@@ -71,6 +89,8 @@ export const AuthAPI = {
     register,
     getUsers,
     updateUser,
+    createUser,
+    getPass,
     logout,
     getAuthentication,
     setAuthentication,
