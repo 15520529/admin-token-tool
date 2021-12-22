@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { PoweroffOutlined } from '@ant-design/icons';
 
 import AccountTab from './AccountTab';
+import NodeTab from './NodeTab';
 import LoginForm from './Login';
 import { verify, logout, getAuthentication, removeAuthentication } from './api/AuthAPI';
 
@@ -49,7 +50,7 @@ function App() {
             setAlertMsg("Tài khoản đã bị khoá!")
             logout(user.username, user.token)
           } else {
-            setInfo({expireDate: resp.data.expireDate, username: resp.data.username})
+            setInfo({ expireDate: resp.data.expireDate, username: resp.data.username })
           }
         }).catch(err => {
           // removeAuthentication()
@@ -121,6 +122,10 @@ function App() {
                         setAccounts={setAccounts}
                         nodeUrl={nodeUrl}
                         setNodeUrl={setNodeUrl} />
+
+                    </TabPane>
+                    <TabPane tab="Node" key="2">
+                      < NodeTab />
                     </TabPane>
                   </Tabs>
                 </Card>

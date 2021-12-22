@@ -84,12 +84,32 @@ export const logout = (username, token) => {
     return axios.get(be_url + `/logout/${username}/${token}`);
 }
 
+export const getNodes = (username, token) => {
+    return axios.get(be_url + `/get-nodes/${username}/${token}`);
+}
+
+
+export const updateNode = (username, token, autoSellNodeUrl ) => {
+    return axios.put(be_url + "/update-node", {
+        username,
+        autoSellNodeUrl,
+        token
+    }, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
 export const AuthAPI = {
     login,
     register,
     getUsers,
+    getNodes,
     updateUser,
     createUser,
+    updateNode,
     getPass,
     logout,
     getAuthentication,
