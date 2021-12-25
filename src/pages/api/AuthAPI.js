@@ -90,11 +90,12 @@ export const getNodes = (username, token) => {
 }
 
 
-export const updateNode = (username, token, autoSellNodeUrl ) => {
+export const updateNode = (username, token, autoSellNodeUrl, nodeType) => {
     return axios.put(be_url + "/update-node", {
         username,
         autoSellNodeUrl,
-        token
+        token,
+        nodeType
     }, {
         headers: {
             'Accept': 'application/json',
