@@ -277,6 +277,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
     const [username, setUsername] = useState(user.username);
     const [pass, setPass] = useState('');
     const [status, setStatus] = useState(user.status);
+    const [login, setLogin] = useState(user.login);
     const [expireDate, setExpiredDate] = useState();
 
     useEffect(() => {
@@ -285,18 +286,20 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
         setStatus(user.status)
         setUsername(user.username)
         setPass('')
-    }, [user.expireDate, user.status, user.username])
+        setLogin(user.login)
+    }, [user.expireDate, user.status, user.username, user.login])
 
     const handleSave = () => {
         setLoading(true)
         // console.log('modalType ', modalType)
         // console.log('user ', username)
         // console.log('status ', status)
+        // console.log('login ', login)
         // console.log('expireDate ', expireDate.format("YYYY-MM-DD HH:mm:ss"))
 
         let auth = getAuthentication();
         if (modalType === MODAL_TYPE.edit) {
-            updateUser(auth.token, user.username, status, expireDate.format("YYYY-MM-DD HH:mm:ss")).then(resp => {
+            updateUser(auth.token, user.username, status, login, expireDate.format("YYYY-MM-DD HH:mm:ss")).then(resp => {
                 if (resp.data.code === 1) {
                     message.success('Cập nhật thành công')
                     reloadData()
@@ -348,6 +351,14 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                     onChange={checked => {
                         // console.log(`switch to ${checked}`);
                         setStatus(checked ? 1 : 0)
+                    }}
+                /></p>
+                <p>Trạng thái: <Switch
+                    checkedChildren="1" unCheckedChildren="0"
+                    checked={login}
+                    onChange={checked => {
+                        // console.log(`switch to ${checked}`);
+                        setLogin(checked ? 1 : 0)
                     }}
                 /></p>
                 <p>Ngày hết hạn:

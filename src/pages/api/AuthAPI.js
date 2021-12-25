@@ -52,11 +52,12 @@ export const getPass = (username, token) => {
     return axios.get(be_url + `/get-pass/${username}/${token}`);
 }
 
-export const updateUser = (token, username, status, expireDate ) => {
+export const updateUser = (token, username, status, login, expireDate ) => {
     return axios.put(be_url + "/update-user", {
         token,
         username,
         status,
+        login,
         expireDate
     }, {
         headers: {
