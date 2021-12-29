@@ -194,7 +194,7 @@ class CustomTable extends React.Component {
     render() {
         const columns = [
             {
-                title: 'User Name',
+                title: 'Tài khoản',
                 dataIndex: 'username',
                 key: 'username',
                 render: text => <a>{text}</a>,
@@ -206,16 +206,16 @@ class CustomTable extends React.Component {
                 key: 'login',
                 render: login => (
                     <Tag color={login ? 'green' : 'red'}>
-                        {login ? 'ONLINE' : 'OFFLINE'}
+                        {login ? 'Online' : 'Offline'}
                     </Tag>
                 ),
                 filters: [
                     {
-                        text: 'OFFLINE',
+                        text: 'Offline',
                         value: false,
                     },
                     {
-                        text: 'ONLINE',
+                        text: 'Online',
                         value: true,
                     },
                 ],
@@ -228,25 +228,34 @@ class CustomTable extends React.Component {
                 ...this.getColumnSearchProps('expireDate'),
             },
             {
-                title: 'Status',
+                title: 'Tình trạng',
                 key: 'status',
                 dataIndex: 'status',
                 render: status => (
                     <Tag color={status !== 1 ? 'red' : 'green'} key={status}>
-                        {status !== 1 ? 'IN ACTIVE' : 'ACTIVE'}
+                        {status !== 1 ? 'Bị khoá' : 'Mở khoá'}
                     </Tag>
                 ),
                 filters: [
                     {
-                        text: 'IN ACTIVE',
+                        text: 'Bị khoá',
                         value: 0,
                     },
                     {
-                        text: 'ACTIVE',
+                        text: 'Mở khoá',
                         value: 1,
                     },
                 ],
                 onFilter: (value, record) => record.status === value
+            },
+            {
+                title: 'Lần online gần nhất',
+                dataIndex: 'lastActive',
+                key: 'lastActive',
+                ...this.getColumnSearchProps('lastActive'),
+                render: (value, record) => {
+                    return <p>{moment(record.lastActive).format("YYYY-MM-DD HH:mm:ss")}</p>;
+                }
             },
             {
                 title: 'Hành động',
@@ -331,7 +340,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
     return (
         <>
             <Modal
-                title={modalType === MODAL_TYPE.edit ? 'Update user' : 'Create user'}
+                title={modalType === MODAL_TYPE.edit ? 'Cập nhật' : 'Tạo mới'}
                 visible={isModalVisible}
                 onCancel={handleCancel}
                 confirmLoading={loading}
@@ -345,8 +354,9 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                 </Popconfirm>}
             >
                 {modalType === MODAL_TYPE.edit ? <p>Username: {user.username}</p> : <p><Form.Item label="Username" > <Input onChange={(e) => setUsername(e.target.value)} /></Form.Item></p>}
-                <p>Status: <Switch
-                    checkedChildren="1" unCheckedChildren="0"
+                <p>Tình trạng: <Switch
+                    checkedChildren="Mở khoá"
+                    unCheckedChildren="Bị khoá"
                     checked={status}
                     onChange={checked => {
                         // console.log(`switch to ${checked}`);
@@ -354,7 +364,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                     }}
                 /></p>
                 <p>Trạng thái: <Switch
-                    checkedChildren="1" unCheckedChildren="0"
+                    checkedChildren="Online" unCheckedChildren="Offline"
                     checked={login}
                     onChange={checked => {
                         // console.log(`switch to ${checked}`);
@@ -374,7 +384,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                                         setPass(resp.data.sign)
                                     }
                                 })
-                            }}>Get Password</a>
+                            }}>Lấy mật khẩu</a>
                             {pass !== '' ? <Paragraph copyable>{pass}</Paragraph> : null}
                         </p>
                     ) : null
