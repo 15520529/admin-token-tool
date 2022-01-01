@@ -1,34 +1,21 @@
 
 import React from 'react';
-import { Table, Tag, Input, Form, Button, Popconfirm, Switch, DatePicker, Modal, Space, notification, Typography, Divider, Descriptions, message } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { ethers, Wallet } from 'ethers'
+import { Table, Tag, Input, Form, Button, Popconfirm, Switch, DatePicker, Modal, Space, Typography, message } from 'antd';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
-import { getUsers, updateUser, createUser, getPass, getAuthentication } from './api/AuthAPI';
+import { getUsers, updateUser, createUser, getPass, updatePassword, getAuthentication } from './api/AuthAPI';
 import Highlighter from 'react-highlight-words';
-import { SearchOutlined } from '@ant-design/icons';
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-var CryptoJS = require("crypto-js");
-let provider = null
-let defWsOpen = null
-let defWsClose = null
-let keepAliveInterval = null
-let KEEP_ALIVE_CHECK_INTERVAL = 1000
+import { SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+
 const MODAL_TYPE = {
     edit: 'edit',
     create: 'create'
 }
-const tailLayout = {
-    wrapperCol: { offset: 8, span: 16 },
-};
-const { Paragraph } = Typography;
 
-const openNotificationWithIcon = (type, message) => {
-    notification[type]({ message });
-};
+const { Paragraph, Text } = Typography;
+const { confirm } = Modal;
 
-const AccountTab = ({ accounts, setAccounts, nodeUrl, setNodeUrl, inFo }) => {
+const AccountTab = ({ }) => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState('edit');
@@ -42,9 +29,6 @@ const AccountTab = ({ accounts, setAccounts, nodeUrl, setNodeUrl, inFo }) => {
     useEffect(() => {
         load();
     }, [])
-    // console.log('node',nodeUrl)
-    // console.log('node quick_node')
-
 
     const load = async () => {
         let user = getAuthentication();
@@ -61,36 +45,10 @@ const AccountTab = ({ accounts, setAccounts, nodeUrl, setNodeUrl, inFo }) => {
         })
     }
 
-    const onWsOpen = async (event) => {
-        // console.log('Connected to the WebSocket!')
-        keepAliveInterval = setInterval(() => {
-            if (provider._websocket.readyState === WebSocket.OPEN || provider._websocket.readyState === WebSocket.OPENING) {
-                return
-            }
-            provider._websocket.close()
-        }, KEEP_ALIVE_CHECK_INTERVAL)
-
-        if (defWsOpen) defWsOpen(event)
-    }
-
-    const onWsClose = (event) => {
-        // console.log('WebSocket connection lost! Reconnecting...')
-        clearInterval(keepAliveInterval)
-        load()
-
-        if (defWsClose) defWsClose(event)
-    }
-
-    const getAccountInfoStr = (fieldKey) => {
-        let account = accounts.get(fieldKey);
-        return `Address: ${account ? account.address : 'N/A'} - Balance: ${account ? account.bnbAmount : 'N/A'} BNB`;
-    }
-
     const showModal = (type) => {
         setIsModalVisible(true)
         setModalType(type);
     };
-
 
     // console.log('data ', data)
     return (
@@ -262,10 +220,10 @@ class CustomTable extends React.Component {
                 key: 'action',
                 render: (text, record) => (
                     <Space size="middle">
-                        <a onClick={() => {
+                        <Text type='success' style={{cursor: 'pointer'}} onClick={() => {
                             this.props.setUser(record)
                             this.props.showModal(MODAL_TYPE.edit)
-                        }}>Edit</a>
+                        }}>Edit</Text>
                     </Space>
                 ),
             },
@@ -299,13 +257,16 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
     }, [user.expireDate, user.status, user.username, user.login])
 
     const handleSave = () => {
-        setLoading(true)
         // console.log('modalType ', modalType)
         // console.log('user ', username)
         // console.log('status ', status)
         // console.log('login ', login)
         // console.log('expireDate ', expireDate.format("YYYY-MM-DD HH:mm:ss"))
-
+        if(!expireDate){
+            message.warn("Nhập đúng expireDate")
+            return;
+        }
+        setLoading(true)
         let auth = getAuthentication();
         if (modalType === MODAL_TYPE.edit) {
             updateUser(auth.token, user.username, status, login, expireDate.format("YYYY-MM-DD HH:mm:ss")).then(resp => {
@@ -336,6 +297,27 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
         setIsModalVisible(false);
     };
 
+    function showChangePassConfirm(newPass) {
+        confirm({
+            title: 'Do you want to update password?',
+            icon: <ExclamationCircleOutlined />,
+            onOk() {
+                console.log('OK ', newPass);
+                let auth = getAuthentication();
+                updatePassword(username, newPass, auth.username, auth.token).then(resp => {
+                    if (resp.data.code === 1) {
+                        setPass(newPass)
+                        message.success("Cập nhật thành công")
+                    } else {
+                        message.error(resp.data.message)
+                    }
+                })
+            },
+            onCancel() {
+                console.log('Cancel');
+            },
+        });
+    }
 
     return (
         <>
@@ -359,7 +341,6 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                     unCheckedChildren="Bị khoá"
                     checked={status}
                     onChange={checked => {
-                        // console.log(`switch to ${checked}`);
                         setStatus(checked ? 1 : 0)
                     }}
                 /></p>
@@ -367,7 +348,6 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                     checkedChildren="Online" unCheckedChildren="Offline"
                     checked={login}
                     onChange={checked => {
-                        // console.log(`switch to ${checked}`);
                         setLogin(checked ? 1 : 0)
                     }}
                 /></p>
@@ -377,15 +357,15 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                 {
                     modalType === MODAL_TYPE.edit ? (
                         <p>
-                            <a onClick={() => {
+                            <Text type='success' style={{cursor: 'pointer'}} onClick={() => {
                                 let auth = getAuthentication();
                                 getPass(username, auth.token).then(resp => {
                                     if (resp.data.code === 1) {
                                         setPass(resp.data.sign)
                                     }
                                 })
-                            }}>Lấy mật khẩu</a>
-                            {pass !== '' ? <Paragraph copyable>{pass}</Paragraph> : null}
+                            }}>Lấy mật khẩu</Text>
+                            {pass !== '' ? <Paragraph editable={{ onChange: value => showChangePassConfirm(value) }}>{pass}</Paragraph> : null}
                         </p>
                     ) : null
                 }

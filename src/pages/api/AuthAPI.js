@@ -52,6 +52,20 @@ export const getPass = (username, token) => {
     return axios.get(be_url + `/get-pass/${username}/${token}`);
 }
 
+export const updatePassword = (username, newPassword, admin, token) => {
+    return axios.post(be_url + "/admin/update-password", {
+        username,
+        newPassword,
+        admin,
+        token
+    }, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
 export const updateUser = (token, username, status, login, expireDate ) => {
     return axios.put(be_url + "/update-user", {
         token,
@@ -113,6 +127,7 @@ export const AuthAPI = {
     createUser,
     updateNode,
     getPass,
+    updatePassword,
     logout,
     getAuthentication,
     setAuthentication,

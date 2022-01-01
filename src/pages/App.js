@@ -11,7 +11,6 @@ import { verify, logout, getAuthentication, removeAuthentication } from './api/A
 import '../asset/App.css';
 import { useEffect, useState } from 'react';
 
-const { REACT_APP_DEFAULT_NODE_URL } = process.env
 const { TabPane } = Tabs;
 const { Content } = Layout;
 
@@ -92,7 +91,6 @@ function App() {
             </div>
           </div>
           <Button
-            // type="primary"
             icon={<PoweroffOutlined />}
             onClick={() => {
               let user = getAuthentication();
