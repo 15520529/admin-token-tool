@@ -1,10 +1,10 @@
-import { Tabs, Card, Menu, Layout, Button, message } from 'antd';
+import { Tabs, Card, Menu, Layout, Button } from 'antd';
 import { Header } from 'antd/lib/layout/layout';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { PoweroffOutlined } from '@ant-design/icons';
 
 import AccountTab from './AccountTab';
-import NodeTab from './NodeTab';
+import SystemTab from './SystemTab';
 import LoginForm from './Login';
 import { verify, logout, getAuthentication, removeAuthentication } from './api/AuthAPI';
 
@@ -123,7 +123,7 @@ function App() {
 
                     </TabPane>
                     <TabPane tab="Node" key="2">
-                      < NodeTab />
+                      < SystemTab />
                     </TabPane>
                   </Tabs>
                 </Card>

@@ -99,17 +99,17 @@ export const logout = (username, token) => {
     return axios.get(be_url + `/logout/${username}/${token}`);
 }
 
-export const getNodes = (username, token) => {
-    return axios.get(be_url + `/get-nodes/${username}/${token}`);
+export const getConfig = (username, token) => {
+    return axios.get(be_url + `/get-config/${username}/${token}`);
 }
 
 
-export const updateNode = (username, token, autoSellNodeUrl, nodeType) => {
-    return axios.put(be_url + "/update-node", {
+export const updateConfig = (username, token, value, configType) => {
+    return axios.put(be_url + "/update-config", {
         username,
-        autoSellNodeUrl,
+        value,
         token,
-        nodeType
+        configType
     }, {
         headers: {
             'Accept': 'application/json',
@@ -122,10 +122,10 @@ export const AuthAPI = {
     login,
     register,
     getUsers,
-    getNodes,
+    getNodes: getConfig,
     updateUser,
     createUser,
-    updateNode,
+    updateNode: updateConfig,
     getPass,
     updatePassword,
     logout,
