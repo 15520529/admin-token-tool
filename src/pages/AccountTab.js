@@ -293,6 +293,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
         setUsername(user.username)
         setPass('')
         setLogin(user.login)
+        setTeleId(user.telegramId)
     }, [user.expireDate, user.status, user.username, user.login])
 
     const handleSave = () => {
