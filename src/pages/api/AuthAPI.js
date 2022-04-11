@@ -66,13 +66,14 @@ export const updatePassword = (username, newPassword, admin, token) => {
     })
 }
 
-export const updateUser = (token, username, status, login, expireDate ) => {
+export const updateUser = (token, username, status, login, expireDate, teleId ) => {
     return axios.put(be_url + "/update-user", {
         token,
         username,
         status,
         login,
-        expireDate
+        expireDate,
+        teleId
     }, {
         headers: {
             'Accept': 'application/json',
@@ -81,12 +82,25 @@ export const updateUser = (token, username, status, login, expireDate ) => {
     })
 }
 
-export const createUser = (token, username, status, expireDate ) => {
+export const createUser = (token, username, status, expireDate, teleId ) => {
     return axios.post(be_url + "/create-user", {
         token,
         username,
         status,
-        expireDate
+        expireDate,
+        teleId
+    }, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
+export const deleteUser = (token, username ) => {
+    return axios.put(be_url + "/delete-user", {
+        token,
+        username,
     }, {
         headers: {
             'Accept': 'application/json',
@@ -125,6 +139,7 @@ export const AuthAPI = {
     getNodes: getConfig,
     updateUser,
     createUser,
+    deleteUser,
     updateNode: updateConfig,
     getPass,
     updatePassword,

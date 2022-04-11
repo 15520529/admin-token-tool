@@ -3,13 +3,14 @@ import React from 'react';
 import { Table, Tag, Input, Form, Button, Popconfirm, Switch, DatePicker, Modal, Space, Typography, message } from 'antd';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
-import { getUsers, updateUser, createUser, getPass, updatePassword, getAuthentication } from './api/AuthAPI';
+import { getUsers, updateUser, createUser, deleteUser, getPass, updatePassword, getAuthentication } from './api/AuthAPI';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 const MODAL_TYPE = {
     edit: 'edit',
-    create: 'create'
+    create: 'create',
+    delete: 'delete',
 }
 
 const { Paragraph, Text } = Typography;
@@ -54,13 +55,14 @@ const AccountTab = ({ }) => {
     return (
         <>
             {/* <Table columns={columns} dataSource={data} loading={loading}/> */}
-            <CustomTable data={data} loading={loading} setUser={setUser} showModal={showModal} />
+            <CustomTable data={data} loading={loading} setUser={setUser} reloadData={load} showModal={showModal} />
             <ModalUser user={user} isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} reloadData={load} modalType={modalType} />
         </>
     )
 }
 
 class CustomTable extends React.Component {
+
     state = {
         searchText: '',
         searchedColumn: '',
@@ -184,6 +186,23 @@ class CustomTable extends React.Component {
                 dataIndex: 'expireDate',
                 key: 'expireDate',
                 ...this.getColumnSearchProps('expireDate'),
+                sorter: (a, b) => moment(a.expireDate).diff(moment(), "days") - moment(b.expireDate).diff(moment(), "days"),
+            },
+            {
+                title: 'Số ngày sử dụng còn lại',
+                dataIndex: 'expireDate',
+                key: 'expireDate',
+                // ...this.getColumnSearchProps('expireDate'),
+                sorter: (a, b) => moment(a.expireDate).diff(moment(), "days") - moment(b.expireDate).diff(moment(), "days"),
+                render: expireDate => (
+                    <p>{moment(expireDate).diff(moment(), "days") + 1}</p>
+                ),
+            },
+            {
+                title: 'TelegramID',
+                dataIndex: 'telegramId',
+                key: 'telegramId',
+                ...this.getColumnSearchProps('telegramId')
             },
             {
                 title: 'Tình trạng',
@@ -220,10 +239,29 @@ class CustomTable extends React.Component {
                 key: 'action',
                 render: (text, record) => (
                     <Space size="middle">
-                        <Text type='success' style={{cursor: 'pointer'}} onClick={() => {
+                        <Text type='success' style={{ cursor: 'pointer' }} onClick={() => {
                             this.props.setUser(record)
                             this.props.showModal(MODAL_TYPE.edit)
                         }}>Edit</Text>
+                        <Popconfirm
+                            placement="topLeft"
+                            title="Do you want to delete"
+                            onConfirm={() => {
+                                let auth = getAuthentication();
+                                this.props.reloadData()
+                                deleteUser(auth.token, record.username).then(resp => {
+                                    if (resp.data.code === 1) {
+                                        message.success("Delete thành công")
+                                        this.props.reloadData()
+                                    } else {
+                                        message.error(resp.data.message)
+                                    }
+                                })
+                            }}
+                            okText="Yes"
+                            cancelText="No">
+                            <Text type='danger' style={{ cursor: 'pointer' }}>Delete</Text>
+                        </Popconfirm>
                     </Space>
                 ),
             },
@@ -246,6 +284,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
     const [status, setStatus] = useState(user.status);
     const [login, setLogin] = useState(user.login);
     const [expireDate, setExpiredDate] = useState();
+    const [teleId, setTeleId] = useState('');
 
     useEffect(() => {
         // console.log('useEffect ', user)
@@ -262,14 +301,14 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
         // console.log('status ', status)
         // console.log('login ', login)
         // console.log('expireDate ', expireDate.format("YYYY-MM-DD HH:mm:ss"))
-        if(!expireDate){
+        if (!expireDate) {
             message.warn("Nhập đúng expireDate")
             return;
         }
         setLoading(true)
         let auth = getAuthentication();
         if (modalType === MODAL_TYPE.edit) {
-            updateUser(auth.token, user.username, status, login, expireDate.format("YYYY-MM-DD HH:mm:ss")).then(resp => {
+            updateUser(auth.token, user.username, status, login, expireDate.format("YYYY-MM-DD HH:mm:ss"), teleId).then(resp => {
                 if (resp.data.code === 1) {
                     message.success('Cập nhật thành công')
                     reloadData()
@@ -280,7 +319,7 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                 setLoading(false)
             })
         } else if (modalType === MODAL_TYPE.create) {
-            createUser(auth.token, username, status, expireDate.format("YYYY-MM-DD HH:mm:ss")).then(resp => {
+            createUser(auth.token, username, status, expireDate.format("YYYY-MM-DD HH:mm:ss"), teleId).then(resp => {
                 if (resp.data.code === 1) {
                     message.success('Tạo mới thành công')
                     reloadData()
@@ -354,10 +393,13 @@ const ModalUser = ({ user, isModalVisible, setIsModalVisible, reloadData, modalT
                 <p>Ngày hết hạn:
                     <DatePicker format="YYYY-MM-DD HH:mm:ss" showTime value={expireDate} onChange={value => { setExpiredDate(value) }} />
                 </p>
+                <p>TelegramID:
+                    <Input value={teleId} onChange={e => { setTeleId(e.target.value) }} />
+                </p>
                 {
                     modalType === MODAL_TYPE.edit ? (
                         <p>
-                            <Text type='success' style={{cursor: 'pointer'}} onClick={() => {
+                            <Text type='success' style={{ cursor: 'pointer' }} onClick={() => {
                                 let auth = getAuthentication();
                                 getPass(username, auth.token).then(resp => {
                                     if (resp.data.code === 1) {
